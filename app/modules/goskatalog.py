@@ -3,29 +3,56 @@ import requests
 from modules.credentials import (
     API_SECRETS,
     GK_ALL_MUSEUM_LIST,
-    GK_SINGLE_MUSEUM_LIST
+    GK_SINGLE_MUSEUM_LIST,
+    MONGO
     )
 from modules.functions import get_credentials
 from dictor import dictor
+from pymongo import MongoClient
 
+YANDEX_RUBRIC_ID = ""
+COUNTRY = "Россия"
 class Museum:
-    def __init__(self, item):
-        self.museum_gk_id_hash
-        self.museum_gk_id = museum_gk_id
-        self.inn = museum_inn
-        self.company_id = dictor(item, "fullUin")
-        self.name = dictor(item, "name")
-        self.country = "Россия"
-        self.address = dictor(item, "addressString")
-        self.phone = getMuseumContacts(dictor(item, "contacts"), 1)
-        self.email = getMuseumContacts(dictor(item, "contacts"), 2)
-        self.url = getMuseumContacts(dictor(item, "contacts"), 3)
-        self.booking_url = "https://goskatalog.ru/portal/#/museums?id="+ str(dictor(item, "id"))
-        self.working_time = None
-        self.rubric_id = "184105894"
-    
+    def __init__(self, data):
+        self.data = data
+        self.gk_museum_id = None
+        self.museum_inn = None
 
-# TODO add function that updates information about museums
+    def is_exist(self, conn):
+        __get_gk_museum_id()
+        if self.gk_museum_id is None:
+            return False
+        if conn.find_one({"gk_museum_id":self.gk_museum_id}):
+            return True
+        return False
+
+    def has_inn(self):
+        pass
+
+    def add(self,conn):
+        data_to_append = {
+                "museum_gk_id": self.museum_gk_id,
+                "inn": self.museum_inn,
+                "company-id": __get_museum_id(),
+                "name": __get_museum_name(),
+                "country": COUNTRY,
+                "address": __get_museum_address(),
+                "phone": __get_museum_phone(),
+                "email": __get_museum_email(),
+                "url": __get_museum_website(),
+                "booking-url": __get_museum_exhibits_url(),
+                "workingTime": None,
+                "rubric-id": YANDEX_RUBRIC_ID
+            }
+        conn.insert_one(data_to_append)
+
+    def update(self, conn):
+        pass
+    
+    def __get_gk_museum_id(self):
+        self.gk_museum_id = dictor(data, "id")
+
+
 def update_museum_list_gk():
     """Updating museum list in database
 
@@ -33,11 +60,21 @@ def update_museum_list_gk():
         boolead: True if successfull
     """ 
 
+    uri = "mongodb://{}:{}@{}:{}/{}".format(
+        MONGO["username"],
+        MONGO["password"],
+        MONGO["host"],
+        MONGO["port"],
+        MONGO["db"],
+    )
+    client = MongoClient(uri)
+    db = client[MONGO["db"]]
+    mongo_conn = db["museumsList"]
+
+
     gk_data = get_data_from_gk()
     if gk_data is False:
         return False
-
-
 
     museums_updated = 0
     museums_added = 0
