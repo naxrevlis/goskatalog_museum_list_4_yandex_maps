@@ -16,12 +16,12 @@ API_SECRETS = {
     "webGoskatalog": {
         "username": os.environ.get("ENV_GK_USERNAME"),
         "password": os.environ.get("ENV_GK_PASSWORD"),
-        },
+    },
     "esb": {
-            "username": os.environ.get("ENV_ESB_USERNAME"),
-            "password": os.environ.get("ENV_ESB_PASSWORD"),
-        }
-    }
+        "username": os.environ.get("ENV_ESB_USERNAME"),
+        "password": os.environ.get("ENV_ESB_PASSWORD"),
+    },
+}
 
 ESB_URL = os.environ.get("ENV_ESB_URL")
 GK_ALL_MUSEUM_URL = os.environ.get("ENV_GK_ALL_MUSEUM_URL")
